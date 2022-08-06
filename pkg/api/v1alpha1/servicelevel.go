@@ -4,13 +4,12 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"github.com/google/uuid"
 	"gorm.io/gorm"
 )
 
 type ServiceLevel struct {
-	ID          uuid.UUID `gorm:"type:uuid"`
-	Name        string    `gorm:"unique"`
+	Base
+	Name        string `gorm:"unique"`
 	Description string
 	Price       uint
 }
@@ -39,7 +38,6 @@ func (s *ServiceLevelAPI) post(c *gin.Context) {
 		return
 	}
 
-	level.ID = uuid.New()
 	result := s.DB.Create(&level)
 	handlePostResult(c, result, level)
 }
@@ -50,7 +48,7 @@ func (s *ServiceLevelAPI) get(c *gin.Context) {
 		return
 	}
 
-	level := ServiceLevel{ID: pk}
+	level := ServiceLevel{Base: Base{ID: pk}}
 
 	err := s.DB.First(&level).Error
 
@@ -63,7 +61,7 @@ func (s *ServiceLevelAPI) delete(c *gin.Context) {
 		return
 	}
 
-	err := s.DB.Delete(&ServiceLevel{ID: pk}).Error
+	err := s.DB.Delete(&ServiceLevel{Base: Base{ID: pk}}).Error
 
 	handleDeleteResult(c, err)
 }

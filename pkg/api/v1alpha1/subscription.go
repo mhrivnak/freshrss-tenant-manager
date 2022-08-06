@@ -9,7 +9,7 @@ import (
 )
 
 type Subscription struct {
-	ID       uuid.UUID `gorm:"type:uuid"`
+	Base
 	TenantID uuid.UUID
 	Title    string
 	Username string
@@ -53,7 +53,6 @@ func (a *SubscriptionAPI) post(c *gin.Context) {
 		return
 	}
 
-	subscription.ID = uuid.New()
 	subscription.TenantID = tid
 	result := a.DB.Create(&subscription)
 	handlePostResult(c, result, subscription)
@@ -65,7 +64,7 @@ func (a *SubscriptionAPI) get(c *gin.Context) {
 		return
 	}
 
-	subscription := Subscription{ID: pk}
+	subscription := Subscription{Base: Base{ID: pk}}
 
 	err := a.DB.First(&subscription).Error
 
@@ -78,7 +77,7 @@ func (a *SubscriptionAPI) delete(c *gin.Context) {
 		return
 	}
 
-	err := a.DB.Delete(&Subscription{ID: pk}).Error
+	err := a.DB.Delete(&Subscription{Base: Base{ID: pk}}).Error
 
 	handleDeleteResult(c, err)
 }
