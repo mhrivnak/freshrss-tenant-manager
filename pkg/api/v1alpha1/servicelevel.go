@@ -40,13 +40,8 @@ func (s *ServiceLevelAPI) post(c *gin.Context) {
 	}
 
 	level.UUID = uuid.New().String()
-
 	result := s.DB.Create(&level)
-	if result.Error != nil {
-		return
-	}
-
-	c.IndentedJSON(http.StatusCreated, level)
+	handlePostResult(c, result, level)
 }
 
 func (s *ServiceLevelAPI) get(c *gin.Context) {

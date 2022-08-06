@@ -38,13 +38,8 @@ func (t *TenantAPI) post(c *gin.Context) {
 	}
 
 	tenant.UUID = uuid.New().String()
-
 	result := t.DB.Create(&tenant)
-	if result.Error != nil {
-		return
-	}
-
-	c.IndentedJSON(http.StatusCreated, tenant)
+	handlePostResult(c, result, tenant)
 }
 
 func (t *TenantAPI) get(c *gin.Context) {

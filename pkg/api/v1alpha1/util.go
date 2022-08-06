@@ -31,9 +31,20 @@ func handleGetResult(c *gin.Context, err error, model interface{}) {
 	c.IndentedJSON(http.StatusOK, &model)
 }
 
+func handlePostResult(c *gin.Context, result *gorm.DB, model interface{}) {
+	err := result.Error
+	if err != nil {
+		// TODO set a better response code and message
+		c.IndentedJSON(http.StatusBadRequest, gin.H{"message": err.Error()})
+		return
+	}
+
+	c.IndentedJSON(http.StatusCreated, &model)
+}
+
 func handleDeleteResult(c *gin.Context, err error) {
 	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
-		c.IndentedJSON(http.StatusNotFound, gin.H{"message": "error"})
+		c.IndentedJSON(http.StatusInternalServerError, gin.H{"message": "error"})
 		return
 	}
 
