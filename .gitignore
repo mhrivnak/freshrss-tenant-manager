@@ -16,3 +16,6 @@
 
 # sqlite databases
 *.db
+
+# vim
+*.swp

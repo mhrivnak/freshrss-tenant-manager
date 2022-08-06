@@ -18,6 +18,7 @@ func main() {
 	// Migrate the schema
 	for _, model := range []interface{}{
 		&v1alpha1.ServiceLevel{},
+		&v1alpha1.Subscription{},
 		&v1alpha1.Tenant{},
 	} {
 		db.AutoMigrate(model)
@@ -27,6 +28,7 @@ func main() {
 
 	for _, routeAdder := range []api.RouteAdder{
 		&v1alpha1.ServiceLevelAPI{DB: db},
+		&v1alpha1.SubscriptionAPI{DB: db},
 		&v1alpha1.TenantAPI{DB: db},
 	} {
 		routeAdder.AddRoutes(router)

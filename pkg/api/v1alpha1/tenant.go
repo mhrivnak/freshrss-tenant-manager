@@ -9,8 +9,9 @@ import (
 )
 
 type Tenant struct {
-	ID   uuid.UUID `gorm:"type:uuid"`
-	Name string    `gorm:"unique"`
+	ID            uuid.UUID `gorm:"type:uuid"`
+	Name          string    `gorm:"unique"`
+	Subscriptions []Subscription
 }
 
 type TenantAPI struct {
@@ -19,14 +20,14 @@ type TenantAPI struct {
 
 func (t *TenantAPI) AddRoutes(router *gin.Engine) {
 	router.GET("/v1alpha1/tenants/", t.list)
-	router.GET("/v1alpha1/tenants/:id", t.get)
-	router.DELETE("/v1alpha1/tenants/:id", t.delete)
+	router.GET("/v1alpha1/tenants/:tid", t.get)
+	router.DELETE("/v1alpha1/tenants/:tid", t.delete)
 	router.POST("/v1alpha1/tenants/", t.post)
 }
 
 func (t *TenantAPI) list(c *gin.Context) {
 	tenants := []Tenant{}
-	t.DB.Find(&tenants)
+	t.DB.Model(&Tenant{}).Preload("Subscriptions").Find(&tenants)
 	c.IndentedJSON(http.StatusOK, &tenants)
 }
 
@@ -43,20 +44,20 @@ func (t *TenantAPI) post(c *gin.Context) {
 }
 
 func (t *TenantAPI) get(c *gin.Context) {
-	pk, ok := parsePK(c)
+	pk, ok := parseUUID(c, "tid")
 	if !ok {
 		return
 	}
 
 	tenant := Tenant{ID: pk}
 
-	err := t.DB.First(&tenant).Error
+	err := t.DB.Model(&Tenant{}).Preload("Subscriptions").First(&tenant).Error
 
 	handleGetResult(c, err, tenant)
 }
 
 func (t *TenantAPI) delete(c *gin.Context) {
-	pk, ok := parsePK(c)
+	pk, ok := parseUUID(c, "tid")
 	if !ok {
 		return
 	}

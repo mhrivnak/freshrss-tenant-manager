@@ -9,14 +9,18 @@ import (
 	"gorm.io/gorm"
 )
 
-func parsePK(c *gin.Context) (uuid.UUID, bool) {
-	pk := c.Param("id")
+func parseUUID(c *gin.Context, field string) (uuid.UUID, bool) {
+	pk := c.Param(field)
 	ret, err := uuid.Parse(pk)
 	if err != nil {
 		c.IndentedJSON(http.StatusNotFound, gin.H{"message": "invalid UUID"})
 		return ret, false
 	}
 	return ret, true
+}
+
+func parsePK(c *gin.Context) (uuid.UUID, bool) {
+	return parseUUID(c, "id")
 }
 
 func handleGetResult(c *gin.Context, err error, model interface{}) {
