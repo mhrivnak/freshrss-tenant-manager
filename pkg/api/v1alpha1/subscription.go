@@ -1,6 +1,7 @@
 package v1alpha1
 
 import (
+	"log"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -14,6 +15,27 @@ type Subscription struct {
 	Title    string
 	Username string
 	URL      string
+}
+
+func (s *Subscription) notify() error {
+	go func() {
+		// TODO call a configured webhook URL
+		log.Println("Pretending to call webhook")
+	}()
+
+	return nil
+}
+
+func (s *Subscription) AfterCreate(tx *gorm.DB) error {
+	return s.notify()
+}
+
+func (s *Subscription) AfterUpdate(tx *gorm.DB) error {
+	return s.notify()
+}
+
+func (s *Subscription) AfterDelete(tx *gorm.DB) error {
+	return s.notify()
 }
 
 type SubscriptionAPI struct {
