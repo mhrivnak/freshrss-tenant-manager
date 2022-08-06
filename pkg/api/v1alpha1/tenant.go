@@ -25,26 +25,26 @@ func (t *TenantAPI) AddRoutes(router *gin.Engine) {
 }
 
 func (t *TenantAPI) list(c *gin.Context) {
-	levels := []Tenant{}
-	t.DB.Find(&levels)
-	c.IndentedJSON(http.StatusOK, &levels)
+	tenants := []Tenant{}
+	t.DB.Find(&tenants)
+	c.IndentedJSON(http.StatusOK, &tenants)
 }
 
 func (t *TenantAPI) post(c *gin.Context) {
-	level := Tenant{}
-	err := c.BindJSON(&level)
+	tenant := Tenant{}
+	err := c.BindJSON(&tenant)
 	if err != nil {
 		return
 	}
 
-	level.UUID = uuid.New().String()
+	tenant.UUID = uuid.New().String()
 
-	result := t.DB.Create(&level)
+	result := t.DB.Create(&tenant)
 	if result.Error != nil {
 		return
 	}
 
-	c.IndentedJSON(http.StatusCreated, level)
+	c.IndentedJSON(http.StatusCreated, tenant)
 }
 
 func (t *TenantAPI) get(c *gin.Context) {
@@ -53,11 +53,11 @@ func (t *TenantAPI) get(c *gin.Context) {
 		return
 	}
 
-	level := Tenant{}
+	tenant := Tenant{}
 
-	err := t.DB.First(&level, "uuid = ?", pk).Error
+	err := t.DB.First(&tenant, "uuid = ?", pk).Error
 
-	handleGetResult(c, err, level)
+	handleGetResult(c, err, tenant)
 }
 
 func (t *TenantAPI) delete(c *gin.Context) {
