@@ -9,8 +9,8 @@ import (
 )
 
 type ServiceLevel struct {
-	UUID        string `gorm:"primaryKey"`
-	Name        string `gorm:"unique"`
+	ID          uuid.UUID `gorm:"type:uuid"`
+	Name        string    `gorm:"unique"`
 	Description string
 	Price       uint
 }
@@ -21,8 +21,8 @@ type ServiceLevelAPI struct {
 
 func (s *ServiceLevelAPI) AddRoutes(router *gin.Engine) {
 	router.GET("/v1alpha1/servicelevels/", s.list)
-	router.GET("/v1alpha1/servicelevels/:uuid", s.get)
-	router.DELETE("/v1alpha1/servicelevels/:uuid", s.delete)
+	router.GET("/v1alpha1/servicelevels/:id", s.get)
+	router.DELETE("/v1alpha1/servicelevels/:id", s.delete)
 	router.POST("/v1alpha1/servicelevels/", s.post)
 }
 
@@ -39,7 +39,7 @@ func (s *ServiceLevelAPI) post(c *gin.Context) {
 		return
 	}
 
-	level.UUID = uuid.New().String()
+	level.ID = uuid.New()
 	result := s.DB.Create(&level)
 	handlePostResult(c, result, level)
 }
@@ -50,9 +50,9 @@ func (s *ServiceLevelAPI) get(c *gin.Context) {
 		return
 	}
 
-	level := ServiceLevel{}
+	level := ServiceLevel{ID: pk}
 
-	err := s.DB.First(&level, "uuid = ?", pk).Error
+	err := s.DB.First(&level).Error
 
 	handleGetResult(c, err, level)
 }
@@ -63,7 +63,7 @@ func (s *ServiceLevelAPI) delete(c *gin.Context) {
 		return
 	}
 
-	err := s.DB.Delete(&ServiceLevel{UUID: pk}).Error
+	err := s.DB.Delete(&ServiceLevel{ID: pk}).Error
 
 	handleDeleteResult(c, err)
 }

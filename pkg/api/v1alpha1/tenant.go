@@ -9,8 +9,8 @@ import (
 )
 
 type Tenant struct {
-	UUID string `gorm:"primaryKey"`
-	Name string `gorm:"unique"`
+	ID   uuid.UUID `gorm:"type:uuid"`
+	Name string    `gorm:"unique"`
 }
 
 type TenantAPI struct {
@@ -19,8 +19,8 @@ type TenantAPI struct {
 
 func (t *TenantAPI) AddRoutes(router *gin.Engine) {
 	router.GET("/v1alpha1/tenants/", t.list)
-	router.GET("/v1alpha1/tenants/:uuid", t.get)
-	router.DELETE("/v1alpha1/tenants/:uuid", t.delete)
+	router.GET("/v1alpha1/tenants/:id", t.get)
+	router.DELETE("/v1alpha1/tenants/:id", t.delete)
 	router.POST("/v1alpha1/tenants/", t.post)
 }
 
@@ -37,7 +37,7 @@ func (t *TenantAPI) post(c *gin.Context) {
 		return
 	}
 
-	tenant.UUID = uuid.New().String()
+	tenant.ID = uuid.New()
 	result := t.DB.Create(&tenant)
 	handlePostResult(c, result, tenant)
 }
@@ -48,9 +48,9 @@ func (t *TenantAPI) get(c *gin.Context) {
 		return
 	}
 
-	tenant := Tenant{}
+	tenant := Tenant{ID: pk}
 
-	err := t.DB.First(&tenant, "uuid = ?", pk).Error
+	err := t.DB.First(&tenant).Error
 
 	handleGetResult(c, err, tenant)
 }
@@ -61,7 +61,7 @@ func (t *TenantAPI) delete(c *gin.Context) {
 		return
 	}
 
-	err := t.DB.Delete(&Tenant{UUID: pk}).Error
+	err := t.DB.Delete(&Tenant{ID: pk}).Error
 
 	handleDeleteResult(c, err)
 }
