@@ -12,10 +12,17 @@ import (
 type Subscription struct {
 	Base
 	TenantID uuid.UUID
-	Title    string
-	Username string
+	Service  Service `binding:"required,oneof=enabled disabled purged"`
+	Title    string  `binding:"required"`
+	Username string  `binding:"required"`
 	URL      string
 }
+
+type Service string
+
+var Enabled Service = "enabled"
+var Disabled Service = "disabled"
+var Purged Service = "purged"
 
 func (s *Subscription) notify() error {
 	go func() {

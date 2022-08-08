@@ -9,7 +9,7 @@ import (
 
 type Tenant struct {
 	Base
-	Name          string `gorm:"unique"`
+	Name          string `gorm:"unique" binding:"required"`
 	Subscriptions []Subscription
 }
 
@@ -34,6 +34,7 @@ func (t *TenantAPI) post(c *gin.Context) {
 	tenant := Tenant{}
 	err := c.BindJSON(&tenant)
 	if err != nil {
+		c.IndentedJSON(http.StatusBadRequest, gin.H{"message": err.Error()})
 		return
 	}
 

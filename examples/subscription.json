@@ -1,4 +1,5 @@
 {
     "Title": "My Fav Feeds",
-    "Username": "Alice"
+    "Username": "Alice",
+    "Service": "enabled"
 }

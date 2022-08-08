@@ -9,7 +9,7 @@ import (
 
 type ServiceLevel struct {
 	Base
-	Name        string `gorm:"unique"`
+	Name        string `gorm:"unique" binding:"required"`
 	Description string
 	Price       uint
 }
