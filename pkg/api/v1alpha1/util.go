@@ -47,14 +47,15 @@ func handleListResult(c *gin.Context, err error, models []LinkAdder) {
 	c.IndentedJSON(http.StatusOK, &models)
 }
 
-func handlePostResult(c *gin.Context, result *gorm.DB, model interface{}) {
+func handlePostResult(c *gin.Context, result *gorm.DB, model LinkAdder) {
 	err := result.Error
 	if err != nil {
 		// TODO set a better response code and message
 		c.IndentedJSON(http.StatusBadRequest, gin.H{"message": err.Error()})
 		return
 	}
-	// TODO add Location header for created resource
+	model.AddLinks()
+	c.Header("Location", model.SelfLink())
 	c.IndentedJSON(http.StatusCreated, &model)
 }
 

@@ -25,6 +25,10 @@ func (s *ServiceLevel) AddLinks() {
 	}
 }
 
+func (s *ServiceLevel) SelfLink() string {
+	return s.Links.Self
+}
+
 type ServiceLevelAPI struct {
 	DB *gorm.DB
 }
@@ -54,7 +58,7 @@ func (s *ServiceLevelAPI) post(c *gin.Context) {
 	}
 
 	result := s.DB.Create(&level)
-	handlePostResult(c, result, level)
+	handlePostResult(c, result, &level)
 }
 
 func (s *ServiceLevelAPI) get(c *gin.Context) {

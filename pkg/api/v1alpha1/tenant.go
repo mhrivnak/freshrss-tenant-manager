@@ -31,6 +31,10 @@ func (t *Tenant) AddLinks() {
 	}
 }
 
+func (t *Tenant) SelfLink() string {
+	return t.Links.Self
+}
+
 type TenantAPI struct {
 	DB *gorm.DB
 }
@@ -62,7 +66,7 @@ func (t *TenantAPI) post(c *gin.Context) {
 	}
 
 	result := t.DB.Create(&tenant)
-	handlePostResult(c, result, tenant)
+	handlePostResult(c, result, &tenant)
 }
 
 func (t *TenantAPI) get(c *gin.Context) {

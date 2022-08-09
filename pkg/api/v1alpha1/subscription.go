@@ -59,6 +59,10 @@ func (s *Subscription) AddLinks() {
 	}
 }
 
+func (s *Subscription) SelfLink() string {
+	return s.Links.Self
+}
+
 type SubscriptionAPI struct {
 	DB *gorm.DB
 }
@@ -102,7 +106,7 @@ func (a *SubscriptionAPI) post(c *gin.Context) {
 
 	subscription.TenantID = tid
 	result := a.DB.Create(&subscription)
-	handlePostResult(c, result, subscription)
+	handlePostResult(c, result, &subscription)
 }
 
 func (a *SubscriptionAPI) get(c *gin.Context) {
