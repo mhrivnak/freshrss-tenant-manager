@@ -1,6 +1,7 @@
 package v1alpha1
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -11,6 +12,23 @@ type Tenant struct {
 	Base
 	Name          string `gorm:"unique" binding:"required"`
 	Subscriptions []Subscription
+	Links         TenantLinks `gorm:"-" json:"links"` // ignores this field
+}
+
+type TenantLinks struct {
+	Self          string `json:"self"`
+	Subscriptions string `json:"subscriptions"`
+}
+
+func (t *Tenant) AddLinks() {
+	t.Links = TenantLinks{
+		Self:          fmt.Sprintf("/v1alpha1/tenants/%s", t.ID.String()),
+		Subscriptions: fmt.Sprintf("/v1alpha1/tenants/%s/subscriptions/", t.ID.String()),
+	}
+
+	for i, _ := range t.Subscriptions {
+		t.Subscriptions[i].AddLinks()
+	}
 }
 
 type TenantAPI struct {
@@ -26,8 +44,13 @@ func (t *TenantAPI) AddRoutes(router *gin.Engine) {
 
 func (t *TenantAPI) list(c *gin.Context) {
 	tenants := []Tenant{}
-	t.DB.Model(&Tenant{}).Preload("Subscriptions").Find(&tenants)
-	c.IndentedJSON(http.StatusOK, &tenants)
+	result := t.DB.Model(&Tenant{}).Preload("Subscriptions").Find(&tenants)
+
+	models := make([]LinkAdder, len(tenants))
+	for i, _ := range tenants {
+		models[i] = &tenants[i]
+	}
+	handleListResult(c, result.Error, models)
 }
 
 func (t *TenantAPI) post(c *gin.Context) {
@@ -52,7 +75,7 @@ func (t *TenantAPI) get(c *gin.Context) {
 
 	err := t.DB.Model(&Tenant{}).Preload("Subscriptions").First(&tenant).Error
 
-	handleGetResult(c, err, tenant)
+	handleGetResult(c, err, &tenant)
 }
 
 func (t *TenantAPI) delete(c *gin.Context) {

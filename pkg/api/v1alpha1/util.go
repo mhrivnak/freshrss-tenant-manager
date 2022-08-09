@@ -23,7 +23,7 @@ func parsePK(c *gin.Context) (uuid.UUID, bool) {
 	return parseUUID(c, "id")
 }
 
-func handleGetResult(c *gin.Context, err error, model interface{}) {
+func handleGetResult(c *gin.Context, err error, model LinkAdder) {
 	if errors.Is(err, gorm.ErrRecordNotFound) {
 		c.IndentedJSON(http.StatusNotFound, gin.H{"message": "not found"})
 		return
@@ -32,7 +32,19 @@ func handleGetResult(c *gin.Context, err error, model interface{}) {
 		return
 	}
 
+	model.AddLinks()
 	c.IndentedJSON(http.StatusOK, &model)
+}
+
+func handleListResult(c *gin.Context, err error, models []LinkAdder) {
+	if err != nil {
+		c.IndentedJSON(http.StatusInternalServerError, gin.H{"message": "error getting data"})
+		return
+	}
+	for i, _ := range models {
+		models[i].AddLinks()
+	}
+	c.IndentedJSON(http.StatusOK, &models)
 }
 
 func handlePostResult(c *gin.Context, result *gorm.DB, model interface{}) {
@@ -42,7 +54,7 @@ func handlePostResult(c *gin.Context, result *gorm.DB, model interface{}) {
 		c.IndentedJSON(http.StatusBadRequest, gin.H{"message": err.Error()})
 		return
 	}
-
+	// TODO add Location header for created resource
 	c.IndentedJSON(http.StatusCreated, &model)
 }
 

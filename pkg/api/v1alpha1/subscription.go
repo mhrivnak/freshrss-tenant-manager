@@ -1,6 +1,7 @@
 package v1alpha1
 
 import (
+	"fmt"
 	"log"
 	"net/http"
 
@@ -16,6 +17,7 @@ type Subscription struct {
 	Title    string  `binding:"required"`
 	Username string  `binding:"required"`
 	URL      string
+	Links    SubscriptionLinks `gorm:"-" json:"links"` // ignores this field
 }
 
 type Service string
@@ -45,6 +47,18 @@ func (s *Subscription) AfterDelete(tx *gorm.DB) error {
 	return s.notify()
 }
 
+type SubscriptionLinks struct {
+	Self   string `json:"self"`
+	Tenant string `json:"tenant"`
+}
+
+func (s *Subscription) AddLinks() {
+	s.Links = SubscriptionLinks{
+		Self:   fmt.Sprintf("/v1alpha1/tenants/%s/subscriptions/%s", s.TenantID.String(), s.ID.String()),
+		Tenant: fmt.Sprintf("/v1alpha1/tenants/%s", s.TenantID.String()),
+	}
+}
+
 type SubscriptionAPI struct {
 	DB *gorm.DB
 }
@@ -63,8 +77,12 @@ func (a *SubscriptionAPI) list(c *gin.Context) {
 	}
 
 	subscriptions := []Subscription{}
-	a.DB.Where(&Subscription{TenantID: tid}).Find(&subscriptions)
-	c.IndentedJSON(http.StatusOK, &subscriptions)
+	result := a.DB.Where(&Subscription{TenantID: tid}).Find(&subscriptions)
+	models := make([]LinkAdder, len(subscriptions))
+	for i, _ := range subscriptions {
+		models[i] = &subscriptions[i]
+	}
+	handleListResult(c, result.Error, models)
 }
 
 func (a *SubscriptionAPI) post(c *gin.Context) {
@@ -97,7 +115,7 @@ func (a *SubscriptionAPI) get(c *gin.Context) {
 
 	err := a.DB.First(&subscription).Error
 
-	handleGetResult(c, err, subscription)
+	handleGetResult(c, err, &subscription)
 }
 
 func (a *SubscriptionAPI) delete(c *gin.Context) {

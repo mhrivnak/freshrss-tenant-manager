@@ -13,3 +13,7 @@ func (b *Base) BeforeCreate(tx *gorm.DB) (err error) {
 	b.ID = uuid.New()
 	return
 }
+
+type LinkAdder interface {
+	AddLinks()
+}

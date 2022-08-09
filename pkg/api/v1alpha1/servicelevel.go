@@ -1,7 +1,7 @@
 package v1alpha1
 
 import (
-	"net/http"
+	"fmt"
 
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
@@ -12,6 +12,17 @@ type ServiceLevel struct {
 	Name        string `gorm:"unique" binding:"required"`
 	Description string
 	Price       uint
+	Links       ServiceLevelLinks `gorm:"-" json:"links"` // ignores this field
+}
+
+type ServiceLevelLinks struct {
+	Self string `json:"self"`
+}
+
+func (s *ServiceLevel) AddLinks() {
+	s.Links = ServiceLevelLinks{
+		Self: fmt.Sprintf("/v1alpha1/servicelevels/%s", s.ID.String()),
+	}
 }
 
 type ServiceLevelAPI struct {
@@ -27,8 +38,12 @@ func (s *ServiceLevelAPI) AddRoutes(router *gin.Engine) {
 
 func (s *ServiceLevelAPI) list(c *gin.Context) {
 	levels := []ServiceLevel{}
-	s.DB.Find(&levels)
-	c.IndentedJSON(http.StatusOK, &levels)
+	result := s.DB.Find(&levels)
+	models := make([]LinkAdder, len(levels))
+	for i, _ := range levels {
+		models[i] = &levels[i]
+	}
+	handleListResult(c, result.Error, models)
 }
 
 func (s *ServiceLevelAPI) post(c *gin.Context) {
@@ -52,7 +67,7 @@ func (s *ServiceLevelAPI) get(c *gin.Context) {
 
 	err := s.DB.First(&level).Error
 
-	handleGetResult(c, err, level)
+	handleGetResult(c, err, &level)
 }
 
 func (s *ServiceLevelAPI) delete(c *gin.Context) {
