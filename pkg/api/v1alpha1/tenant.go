@@ -20,14 +20,14 @@ type TenantLinks struct {
 	Subscriptions string `json:"subscriptions"`
 }
 
-func (t *Tenant) AddLinks() {
+func (t *Tenant) AddLinks(base string) {
 	t.Links = TenantLinks{
-		Self:          fmt.Sprintf("/v1alpha1/tenants/%s", t.ID.String()),
-		Subscriptions: fmt.Sprintf("/v1alpha1/tenants/%s/subscriptions/", t.ID.String()),
+		Self:          fmt.Sprintf("%s/v1alpha1/tenants/%s", base, t.ID.String()),
+		Subscriptions: fmt.Sprintf("%s/v1alpha1/tenants/%s/subscriptions/", base, t.ID.String()),
 	}
 
 	for i, _ := range t.Subscriptions {
-		t.Subscriptions[i].AddLinks()
+		t.Subscriptions[i].AddLinks(base)
 	}
 }
 

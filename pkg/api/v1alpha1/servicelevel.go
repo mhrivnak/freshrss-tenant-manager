@@ -19,9 +19,9 @@ type ServiceLevelLinks struct {
 	Self string `json:"self"`
 }
 
-func (s *ServiceLevel) AddLinks() {
+func (s *ServiceLevel) AddLinks(base string) {
 	s.Links = ServiceLevelLinks{
-		Self: fmt.Sprintf("/v1alpha1/servicelevels/%s", s.ID.String()),
+		Self: fmt.Sprintf("%s/v1alpha1/servicelevels/%s", base, s.ID.String()),
 	}
 }
 

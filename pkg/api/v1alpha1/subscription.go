@@ -52,10 +52,10 @@ type SubscriptionLinks struct {
 	Tenant string `json:"tenant"`
 }
 
-func (s *Subscription) AddLinks() {
+func (s *Subscription) AddLinks(base string) {
 	s.Links = SubscriptionLinks{
-		Self:   fmt.Sprintf("/v1alpha1/tenants/%s/subscriptions/%s", s.TenantID.String(), s.ID.String()),
-		Tenant: fmt.Sprintf("/v1alpha1/tenants/%s", s.TenantID.String()),
+		Self:   fmt.Sprintf("%s/v1alpha1/tenants/%s/subscriptions/%s", base, s.TenantID.String(), s.ID.String()),
+		Tenant: fmt.Sprintf("%s/v1alpha1/tenants/%s", base, s.TenantID.String()),
 	}
 }
 

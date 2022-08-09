@@ -15,6 +15,6 @@ func (b *Base) BeforeCreate(tx *gorm.DB) (err error) {
 }
 
 type LinkAdder interface {
-	AddLinks()
+	AddLinks(base string)
 	SelfLink() string
 }

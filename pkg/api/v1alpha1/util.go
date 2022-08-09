@@ -3,6 +3,7 @@ package v1alpha1
 import (
 	"errors"
 	"net/http"
+	"net/url"
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
@@ -23,6 +24,18 @@ func parsePK(c *gin.Context) (uuid.UUID, bool) {
 	return parseUUID(c, "id")
 }
 
+func getBaseURL(c *gin.Context) string {
+	scheme := "http"
+	if c.Request.TLS != nil {
+		scheme = "https"
+	}
+	u := url.URL{
+		Scheme: scheme,
+		Host:   c.Request.Host,
+	}
+	return u.String()
+}
+
 func handleGetResult(c *gin.Context, err error, model LinkAdder) {
 	if errors.Is(err, gorm.ErrRecordNotFound) {
 		c.IndentedJSON(http.StatusNotFound, gin.H{"message": "not found"})
@@ -32,7 +45,7 @@ func handleGetResult(c *gin.Context, err error, model LinkAdder) {
 		return
 	}
 
-	model.AddLinks()
+	model.AddLinks(getBaseURL(c))
 	c.IndentedJSON(http.StatusOK, &model)
 }
 
@@ -42,7 +55,7 @@ func handleListResult(c *gin.Context, err error, models []LinkAdder) {
 		return
 	}
 	for i, _ := range models {
-		models[i].AddLinks()
+		models[i].AddLinks(getBaseURL(c))
 	}
 	c.IndentedJSON(http.StatusOK, &models)
 }
@@ -54,7 +67,7 @@ func handlePostResult(c *gin.Context, result *gorm.DB, model LinkAdder) {
 		c.IndentedJSON(http.StatusBadRequest, gin.H{"message": err.Error()})
 		return
 	}
-	model.AddLinks()
+	model.AddLinks(getBaseURL(c))
 	c.Header("Location", model.SelfLink())
 	c.IndentedJSON(http.StatusCreated, &model)
 }
