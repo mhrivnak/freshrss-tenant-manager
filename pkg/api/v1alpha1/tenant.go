@@ -76,9 +76,7 @@ func (t *TenantAPI) get(c *gin.Context) {
 	}
 
 	tenant := Tenant{Base: Base{ID: pk}}
-
 	err := t.DB.Model(&Tenant{}).Preload("Subscriptions").First(&tenant).Error
-
 	handleGetResult(c, err, &tenant)
 }
 
@@ -89,6 +87,5 @@ func (t *TenantAPI) delete(c *gin.Context) {
 	}
 
 	err := t.DB.Delete(&Tenant{Base: Base{ID: pk}}).Error
-
 	handleDeleteResult(c, err)
 }

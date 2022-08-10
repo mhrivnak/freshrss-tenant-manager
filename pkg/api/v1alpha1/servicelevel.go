@@ -68,9 +68,7 @@ func (s *ServiceLevelAPI) get(c *gin.Context) {
 	}
 
 	level := ServiceLevel{Base: Base{ID: pk}}
-
 	err := s.DB.First(&level).Error
-
 	handleGetResult(c, err, &level)
 }
 
@@ -81,6 +79,5 @@ func (s *ServiceLevelAPI) delete(c *gin.Context) {
 	}
 
 	err := s.DB.Delete(&ServiceLevel{Base: Base{ID: pk}}).Error
-
 	handleDeleteResult(c, err)
 }
