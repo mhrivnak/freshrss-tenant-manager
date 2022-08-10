@@ -1,5 +1,11 @@
 # freshrss-tenant-manager
 
+## Configuration
+
+Environment variables:
+
+**`WEBHOOKURL`**: set this to a URL that should receive a POST request when a Subscription is created, updated, or deleted. The request body will include the tenant ID.
+
 ## Usage
 
 ### Create Tenant
